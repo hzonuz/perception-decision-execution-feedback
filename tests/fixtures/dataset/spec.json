@@ -1,0 +1,24 @@
+{
+  "episodes": [
+    {
+      "arena_id": "fixture-arena-a",
+      "episode_id": "fixture-episode-a",
+      "random_seed": 101
+    },
+    {
+      "arena_id": "fixture-arena-b",
+      "episode_id": "fixture-episode-b",
+      "random_seed": 202
+    },
+    {
+      "arena_id": "fixture-arena-c",
+      "episode_id": "fixture-episode-c",
+      "random_seed": 303
+    }
+  ],
+  "frames_per_episode": 2,
+  "image_height": 16,
+  "image_width": 16,
+  "instance_id_suffix": "instance-000001",
+  "simulator_class": "GoodGoal"
+}

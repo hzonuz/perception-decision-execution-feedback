@@ -1,0 +1,11 @@
+{
+  "animalai_binary_release": "4.3.1",
+  "animalai_python": "6.1.2",
+  "mlagents_envs_aai_python": "1.0.0",
+  "python": "3.14.4",
+  "unity_editor": "6000.0.75f1",
+  "unity_editor_revision": "26349cd2a5c8",
+  "unity_ml_agents": "4.0.0",
+  "unity_source_commit": "a2ca7550e3c32a16be268b44fe4ae60028d011c6",
+  "unity_source_path": "animal-ai-unity"
+}

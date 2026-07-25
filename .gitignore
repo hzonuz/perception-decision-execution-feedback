@@ -1,0 +1,64 @@
+# macOS and editors
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Python caches, environments, builds, and coverage
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+.coverage
+coverage.xml
+htmlcov/
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+
+# Local secrets and overrides
+.env
+.env.*
+!.env.example
+*.local.yaml
+*.local.yml
+
+# Unity-generated directories
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+MemoryCaptures/
+
+# Generated datasets, recordings, experiment runs, and reports
+datasets/
+recordings/
+runs/
+wandb/
+mlruns/
+artifacts/
+checkpoints/
+reports/
+captures/
+
+# Model and deployment artifacts
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.engine
+*.tflite
+*.mlmodel
+
+# Large media/capture outputs (small test fixtures may be force-added explicitly)
+*.mp4
+*.mov
+*.avi
+*.mkv

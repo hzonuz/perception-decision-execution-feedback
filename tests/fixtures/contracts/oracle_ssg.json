@@ -1,0 +1,156 @@
+{
+  "agent": {
+    "confidence": 1.0,
+    "node_id": "agent",
+    "source": {
+      "configuration_id": "contracts_fixture",
+      "privileged": true,
+      "producer": "perception_capture",
+      "producer_version": "0.1.0",
+      "source": "simulator_oracle"
+    },
+    "stamp": {
+      "episode_id": "fixture-episode-001",
+      "frame_index": 0,
+      "timestamp_seconds": 0.0
+    },
+    "state": {
+      "current_option": null,
+      "health": 100.0,
+      "node_id": "agent",
+      "option_status": null,
+      "recent_action": {"forward": 0, "name": "no_op", "rotate": 0},
+      "velocity": {"x": 0.0, "y": 0.0, "z": 0.0},
+      "world_position": {"x": 5.0, "y": 0.5, "z": 5.0},
+      "world_rotation": {"w": 1.0, "x": 0.0, "y": 0.0, "z": 0.0}
+    },
+    "uncertainty": null
+  },
+  "confidence": 1.0,
+  "episode_id": "fixture-episode-001",
+  "graph_id": "fixture-episode-001:frame-000000",
+  "is_macro_step": true,
+  "objects": [
+    {
+      "attributes": [
+        {
+          "confidence": 1.0,
+          "name": "unity_tag",
+          "source": {
+            "configuration_id": "contracts_fixture",
+            "privileged": true,
+            "producer": "perception_capture",
+            "producer_version": "0.1.0",
+            "source": "simulator_oracle"
+          },
+          "value": "goodGoal"
+        }
+      ],
+      "bearing_degrees": 0.0,
+      "bounding_box": {
+        "image_height": 64,
+        "image_width": 64,
+        "x_max": 43.0,
+        "x_min": 20.0,
+        "y_max": 49.0,
+        "y_min": 18.0
+      },
+      "confidence": 1.0,
+      "detector_confidence": null,
+      "detector_id": null,
+      "exact_simulator_class": "GoodGoal",
+      "existence_probability": 1.0,
+      "functional_types": [
+        {
+          "belief": {
+            "probability": 1.0,
+            "source": {
+              "configuration_id": "contracts_fixture",
+              "privileged": true,
+              "producer": "perception_capture",
+              "producer_version": "0.1.0",
+              "source": "simulator_oracle"
+            },
+            "uncertainty": null
+          },
+          "name": "collectable"
+        }
+      ],
+      "instance_mask": {
+        "encoding": "png",
+        "height": 64,
+        "instance_value": 1,
+        "path": "masks/fixture-episode-001/000000/instance-0001.png",
+        "width": 64
+      },
+      "last_seen": {
+        "episode_id": "fixture-episode-001",
+        "frame_index": 0,
+        "timestamp_seconds": 0.0
+      },
+      "memory_state": "visible",
+      "node_id": "obj_episode-001_instance-0001",
+      "normalized_location": {"x": 0.4921875, "y": 0.5234375},
+      "relative_distance": 7.25,
+      "relative_velocity": {"x": 0.0, "y": 0.0, "z": 0.0},
+      "semantic_distribution": {
+        "entries": [{"label": "positive_goal", "probability": 1.0}],
+        "unknown_probability": 0.0
+      },
+      "source": {
+        "configuration_id": "contracts_fixture",
+        "privileged": true,
+        "producer": "perception_capture",
+        "producer_version": "0.1.0",
+        "source": "simulator_oracle"
+      },
+      "stamp": {
+        "episode_id": "fixture-episode-001",
+        "frame_index": 0,
+        "timestamp_seconds": 0.0
+      },
+      "track_age_frames": 1,
+      "track_id": "episode-001:instance-0001",
+      "uncertainty": null,
+      "visibility_probability": 0.9
+    }
+  ],
+  "relations": [
+    {
+      "age_frames": 0,
+      "evidence": ["simulator_world_distance"],
+      "object_node_id": "obj_episode-001_instance-0001",
+      "predicate": "near",
+      "probability": 1.0,
+      "source": {
+        "configuration_id": "contracts_fixture",
+        "privileged": true,
+        "producer": "perception_capture",
+        "producer_version": "0.1.0",
+        "source": "simulator_oracle"
+      },
+      "stamp": {
+        "episode_id": "fixture-episode-001",
+        "frame_index": 0,
+        "timestamp_seconds": 0.0
+      },
+      "subject_node_id": "agent",
+      "symbolic_value": null,
+      "uncertainty": null
+    }
+  ],
+  "schema_version": "1.0.0",
+  "source": {
+    "configuration_id": "contracts_fixture",
+    "privileged": true,
+    "producer": "perception_capture",
+    "producer_version": "0.1.0",
+    "source": "simulator_oracle"
+  },
+  "stamp": {
+    "episode_id": "fixture-episode-001",
+    "frame_index": 0,
+    "timestamp_seconds": 0.0
+  },
+  "uncertainty": null
+}

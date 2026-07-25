@@ -1,0 +1,19 @@
+{
+  "allow_empty_annotations": true,
+  "box_mask_tolerance_pixels": 2.0,
+  "class_mode": "semantic",
+  "export_coco": true,
+  "large_area_fraction": 0.1,
+  "moving_speed_threshold": 0.05,
+  "small_area_fraction": 0.01,
+  "split": {
+    "group_by": "episode",
+    "random_seed": 20260725,
+    "ratios": {
+      "test": 0.2,
+      "train": 0.6,
+      "val": 0.2
+    }
+  },
+  "visualization_samples_per_split": 4
+}

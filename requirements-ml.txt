@@ -1,0 +1,7 @@
+-r requirements.txt
+
+# ML dependencies. These versions were resolved against the existing Python 3.14
+# and torch environment; install this file without upgrading unrelated packages.
+torch==2.13.0
+torchvision==0.28.0
+ultralytics==8.4.102

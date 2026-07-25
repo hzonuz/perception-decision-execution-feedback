@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools==83.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "animalai-neurosymbolic-perception"
+version = "0.1.0"
+description = "Typed contracts for a probabilistic temporal Animal-AI scene graph"
+requires-python = "==3.14.*"
+dependencies = [
+  "animalai==6.1.2",
+  "mlagents-envs-aai==1.0.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["perception*"]
+
