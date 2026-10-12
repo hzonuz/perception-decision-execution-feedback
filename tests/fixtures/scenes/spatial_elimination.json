@@ -1,0 +1,9 @@
+{
+  "description": "Two screens; the reward rolls right and disappears behind the right screen only.",
+  "frames": 20,
+  "objects": [
+    {"name": "left_screen", "label": "Wall", "score": 0.95, "keyframes": {"0": [30, 96, 90, 150]}},
+    {"name": "right_screen", "label": "Wall", "score": 0.95, "keyframes": {"0": [160, 96, 220, 150]}},
+    {"name": "goal", "label": "GoodGoal", "score": 0.9, "keyframes": {"0": [110, 112, 126, 128], "10": [180, 112, 196, 128], "19": [180, 112, 196, 128]}, "occluded_by": "right_screen"}
+  ]
+}

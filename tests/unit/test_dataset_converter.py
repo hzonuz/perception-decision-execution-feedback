@@ -61,7 +61,7 @@ class DatasetConverterTests(unittest.TestCase):
                 self.assertTrue((first / f"coco/instances_{split}.json").is_file())
                 self.assertTrue(list((first / "visualizations" / split).glob("*.png")))
             statistics = json.loads((first / "statistics.json").read_text(encoding="utf-8"))
-            self.assertEqual(statistics["samples_per_class"]["positive_goal"], 6)
+            self.assertEqual(statistics["samples_per_class"]["GoodGoal"], 6)
 
     def test_duplicate_frame_is_rejected_and_reported(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

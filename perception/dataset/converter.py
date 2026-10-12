@@ -1,5 +1,3 @@
-"""Leakage-safe conversion from capture contracts to segmentation datasets."""
-
 from __future__ import annotations
 
 import hashlib
@@ -35,7 +33,6 @@ def build_dataset(
     *,
     export_coco: bool | None = None,
 ) -> dict[str, Any]:
-    """Validate, split, convert, summarize, and render a capture dataset."""
     config = DatasetConfig.from_json_file(config_path)
     ontology = load_ontology(ontology_path)
     output = Path(output_root).resolve()
@@ -116,7 +113,7 @@ def _split_groups(samples: list[Sample], config: DatasetConfig) -> dict[str, str
             f"{config.random_seed}:{group}".encode()
         ).digest()
     )
-    counts = _split_counts(len(groups), config.ratios)
+    counts = split_counts(len(groups), config.ratios)
     assignment: dict[str, str] = {}
     offset = 0
     for split in SPLITS:
@@ -126,7 +123,7 @@ def _split_groups(samples: list[Sample], config: DatasetConfig) -> dict[str, str
     return assignment
 
 
-def _split_counts(total: int, ratios: dict[str, float]) -> dict[str, int]:
+def split_counts(total: int, ratios: dict[str, float]) -> dict[str, int]:
     counts = {split: 0 for split in SPLITS}
     active = [split for split in SPLITS if ratios[split] > 0]
     if not total or not active:

@@ -1,0 +1,9 @@
+{
+  "description": "A reward on a raised platform, with a ramp against the platform's left side.",
+  "frames": 6,
+  "objects": [
+    {"name": "platform", "label": "Wall", "score": 0.93, "keyframes": {"0": [96, 100, 196, 140]}},
+    {"name": "goal", "label": "GoodGoalMulti", "score": 0.9, "keyframes": {"0": [138, 84, 154, 102]}},
+    {"name": "ramp", "label": "Ramp", "score": 0.88, "keyframes": {"0": [50, 112, 94, 140]}}
+  ]
+}

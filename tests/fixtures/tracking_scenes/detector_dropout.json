@@ -1,0 +1,7 @@
+{
+  "description": "A static reward the detector misses for four frames while the view is fine.",
+  "frames": 20,
+  "objects": [
+    {"name": "goal", "label": "GoodGoal", "score": 0.9, "keyframes": {"0": [120, 112, 136, 128]}, "missing": [[8, 11]]}
+  ]
+}

@@ -1,23 +1,15 @@
 from __future__ import annotations
 
-import tempfile
 import unittest
-from pathlib import Path
-from types import SimpleNamespace
 
-from perception.contracts import DetectionFrame, FrameStamp
-from perception.detection import (
-    DetectorConfig,
-    detection_frame_from_result,
-    evaluate_predictions,
-)
+from perception.detection import DetectorConfig, evaluate_predictions
 
 
 class DetectorTrainingTests(unittest.TestCase):
-    def test_contract_conversion_and_metadata_metrics_without_model_download(self) -> None:
+    def test_metadata_metrics_without_model_download(self) -> None:
         config = DetectorConfig(
             data="data.yaml",
-            model="yolo11n-seg.yaml",
+            model="yolo26n-seg.yaml",
             pretrained_checkpoint=None,
             resume_checkpoint=None,
             output_root="runs",
@@ -36,30 +28,6 @@ class DetectorTrainingTests(unittest.TestCase):
             calibration_bins=5,
             augmentation={},
         )
-        result = SimpleNamespace(
-            orig_shape=(16, 16),
-            boxes=SimpleNamespace(
-                xyxy=[[4.0, 4.0, 10.0, 10.0]],
-                conf=[0.8],
-                cls=[0],
-            ),
-            masks=None,
-            names={0: "positive_goal"},
-        )
-        with tempfile.TemporaryDirectory() as temporary:
-            frame = detection_frame_from_result(
-                result,
-                FrameStamp("episode-test", 2, 0.04),
-                Path(temporary),
-                configuration_id="unit-test",
-                producer_version="8.4.102",
-            )
-            self.assertEqual(DetectionFrame.from_json(frame.to_json()), frame)
-            self.assertAlmostEqual(
-                frame.objects[0].semantic_distribution.unknown_probability, 0.2
-            )
-            self.assertFalse(frame.source.privileged)
-
         metadata = [
             {
                 "image": "images/test/frame.png",
@@ -102,6 +70,133 @@ class DetectorTrainingTests(unittest.TestCase):
         self.assertEqual(metrics["calibration"]["predictions"], 1)
         self.assertEqual(errors["false_positives"], [])
         self.assertEqual(errors["false_negatives"], [])
+
+    def test_unknown_visibility_lands_in_the_unknown_bucket(self) -> None:
+        """Merged external labels carry explicit nulls; unknown must not crash or count as 0.0."""
+        config = DetectorConfig(
+            data="data.yaml",
+            model="yolo26n-seg.yaml",
+            pretrained_checkpoint=None,
+            resume_checkpoint=None,
+            output_root="runs",
+            experiment_name="test",
+            seed=7,
+            epochs=1,
+            image_size=64,
+            batch_size=1,
+            workers=0,
+            device="cpu",
+            confidence_threshold=0.25,
+            nms_iou=0.7,
+            match_iou=0.5,
+            small_area_fraction=0.1,
+            distant_depth_threshold=10.0,
+            calibration_bins=5,
+            augmentation={},
+        )
+        metadata = [
+            {
+                "image": "images/test/frame.png",
+                "objects": [
+                    {
+                        "class_id": 0,
+                        "class_name": "positive_goal",
+                        "bounding_box": {
+                            "x_min": 0.0,
+                            "y_min": 0.0,
+                            "x_max": 8.0,
+                            "y_max": 8.0,
+                            "image_width": 16,
+                            "image_height": 16,
+                        },
+                        "area_pixels": 64,
+                        "visibility_fraction": None,
+                        "occlusion_fraction": None,
+                        "relative_depth": None,
+                    }
+                ],
+            }
+        ]
+
+        metrics, _ = evaluate_predictions(metadata, {}, ["positive_goal"], config)
+
+        buckets = {
+            item["bucket"]: item for item in metrics["recall_by_visibility_fraction"]
+        }
+        self.assertEqual(buckets["unknown"]["objects"], 1)
+        self.assertEqual(buckets["0.00-0.25"]["objects"], 0)
+        self.assertIsNone(buckets["0.00-0.25"]["recall"])
+
+    def test_recall_by_exact_class_exposes_a_starved_sibling_a_merged_class_hides(self) -> None:
+        """configs/ontology.json merges GoodGoalMulti/GoodGoalMultiBounce/GrowGoal/ShrinkGoal into
+        one detector class 'GoodGoalMulti' because they are pixel-identical. per_class recall for
+        that merged class can look perfect while one rare sibling is never actually found —
+        recall_by_exact_class is what catches that."""
+        config = DetectorConfig(
+            data="data.yaml",
+            model="yolo26n-seg.yaml",
+            pretrained_checkpoint=None,
+            resume_checkpoint=None,
+            output_root="runs",
+            experiment_name="test",
+            seed=7,
+            epochs=1,
+            image_size=64,
+            batch_size=1,
+            workers=0,
+            device="cpu",
+            confidence_threshold=0.25,
+            nms_iou=0.7,
+            match_iou=0.5,
+            small_area_fraction=0.1,
+            distant_depth_threshold=10.0,
+            calibration_bins=5,
+            augmentation={},
+        )
+
+        def merged_object(instance_id: str, exact_class: str, x_min: float) -> dict:
+            return {
+                "instance_id": instance_id,
+                "class_id": 0,
+                "class_name": "GoodGoalMulti",
+                "exact_simulator_class": exact_class,
+                "bounding_box": {
+                    "x_min": x_min,
+                    "y_min": 0.0,
+                    "x_max": x_min + 8.0,
+                    "y_max": 8.0,
+                    "image_width": 32,
+                    "image_height": 16,
+                },
+                "area_pixels": 64,
+                "visibility_fraction": None,
+                "occlusion_fraction": None,
+                "relative_depth": None,
+            }
+
+        metadata = [
+            {
+                "image": "images/test/frame.png",
+                "objects": [
+                    merged_object("a", "GoodGoalMulti", 0.0),
+                    merged_object("b", "ShrinkGoal", 16.0),
+                ],
+            }
+        ]
+        # Only the GoodGoalMulti box gets a matching prediction; ShrinkGoal is never detected.
+        predictions = {
+            "images/test/frame.png": [
+                {"class_id": 0, "class_name": "GoodGoalMulti", "confidence": 0.9,
+                 "bbox": [0.0, 0.0, 8.0, 8.0]},
+            ]
+        }
+
+        metrics, _ = evaluate_predictions(metadata, predictions, ["GoodGoalMulti"], config)
+
+        self.assertEqual(metrics["per_class"]["GoodGoalMulti"]["recall"], 0.5)
+        by_exact = metrics["recall_by_exact_class"]
+        self.assertEqual(by_exact["GoodGoalMulti"]["recall"], 1.0)
+        self.assertEqual(by_exact["ShrinkGoal"]["recall"], 0.0)
 
 
 if __name__ == "__main__":

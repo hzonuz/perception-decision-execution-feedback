@@ -42,7 +42,7 @@ from perception.contracts.geometry import (
 from perception.contracts.observation import ObservationFrame
 from perception.contracts.relations import Relation, RelationPredicate
 from perception.contracts.ssg import AgentNode, GraphHistory, ObjectNode, SSGSnapshot
-from perception.contracts.tracking import ObjectMemory, TrackLifecycle, TrackRecord
+from perception.contracts.tracking import ObjectMemory, TrackFrame, TrackLifecycle, TrackRecord, TrackState
 from perception.contracts.transformer import (
     ActionMaskEntry,
     DecisionArgument,

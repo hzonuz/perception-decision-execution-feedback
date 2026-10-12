@@ -1,0 +1,7 @@
+{
+  "description": "The agent walks into a reward (its box grows), and it vanishes in view: collected.",
+  "frames": 10,
+  "objects": [
+    {"name": "goal", "label": "GoodGoal", "score": 0.9, "keyframes": {"0": [100, 100, 140, 140], "5": [70, 80, 170, 180]}, "until": 5}
+  ]
+}

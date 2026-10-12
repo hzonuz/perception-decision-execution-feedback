@@ -7,11 +7,29 @@ name = "animalai-neurosymbolic-perception"
 version = "0.1.0"
 description = "Typed contracts for a probabilistic temporal Animal-AI scene graph"
 requires-python = "==3.14.*"
+
+# Verified base environment. Do NOT add `mlagents` here: that is the Unity ML-Agents *trainer*
+# (Python 3.10 only). Animal-AI v6 talks to the environment through the `mlagents-envs-aai` fork.
 dependencies = [
   "animalai==6.1.2",
+  "grpcio==1.82.1",
   "mlagents-envs-aai==1.0.0",
+  "numpy==2.5.1",
+  "packaging==26.2",
+  "pillow==12.3.0",
+  "protobuf==7.35.1",
+  "tqdm==4.69.0",
+]
+
+# pip install -e ".[ml]"  — detector training and the notebooks.
+[project.optional-dependencies]
+ml = [
+  "torch==2.13.0",
+  "torchvision==0.28.0",
+  "ultralytics==8.4.102",
+  "jupyterlab==4.6.3",
+  "ipykernel==7.3.0",
 ]
 
 [tool.setuptools.packages.find]
 include = ["perception*"]
-

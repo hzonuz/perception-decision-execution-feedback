@@ -93,6 +93,7 @@ def evaluate_predictions(
         "confidence_threshold": config.confidence_threshold,
         "match_iou": config.match_iou,
         "per_class": per_class,
+        "recall_by_exact_class": _recall_by_exact_class(ground_truths),
         "small_object_recall": _recall(small),
         "recall_by_visibility_fraction": _fraction_recall(
             ground_truths, "visibility_fraction"
@@ -139,6 +140,26 @@ def evaluate_predictions(
     return metrics, errors
 
 
+def _recall_by_exact_class(
+    ground_truths: list[dict[str, Any]],
+) -> dict[str, dict[str, int | float | None]]:
+    """Recall keyed by the raw simulator class, independent of how classes are grouped for training.
+
+    When the ontology merges several exact classes into one detector-facing semantic class (e.g.
+    `GoodGoalMulti` covers GoodGoalMulti, GoodGoalMultiBounce, GrowGoal, and ShrinkGoal — pixel-
+    identical in a single frame, see `configs/ontology.json`), a prediction correctly labelled with
+    the merged class counts as a match for *any* member. `per_class` reports whether the merged
+    group is detected at all; this reports whether every member of the group is actually being
+    found, or whether the merge is quietly starving a rare sibling in favour of a common one.
+    """
+    by_exact_class: dict[str, list[dict[str, Any]]] = {}
+    for item in ground_truths:
+        name = item.get("exact_simulator_class")
+        if name:
+            by_exact_class.setdefault(name, []).append(item)
+    return {name: _recall(items) for name, items in sorted(by_exact_class.items())}
+
+
 def _fraction_recall(
     items: list[dict[str, Any]], field: str
 ) -> list[dict[str, int | float | str | None]]:
@@ -157,7 +178,7 @@ def _fraction_recall(
             if (
                 item.get(field) is None
                 if lower is None
-                else lower <= item.get(field, -1) < upper
+                else item.get(field) is not None and lower <= item[field] < upper
             )
         ]
         output.append({"bucket": label, **_recall(selected)})

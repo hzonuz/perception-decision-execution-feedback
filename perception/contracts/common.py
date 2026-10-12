@@ -33,6 +33,7 @@ class MemoryState(str, Enum):
     UNOBSERVABLE = "unobservable"
     BELIEVED_PRESENT = "believed_present"
     TERMINATED = "terminated"
+    LOST = "lost"  # observable, in view, unexplained miss: unlike TERMINATED, no evidence of absence
 
 
 class MotionState(str, Enum):

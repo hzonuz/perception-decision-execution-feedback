@@ -48,6 +48,29 @@ class CaptureProcessorIntegrationTests(unittest.TestCase):
             self.assertEqual(oracle.objects[0].track_age_frames, 2)
             self.assertTrue(oracle.source.privileged)
 
+    def test_out_of_range_visibility_fraction_is_clamped_not_rejected(self) -> None:
+        """A mask colour collision can push Unity's visible/amodal pixel ratio past 1.0."""
+        with tempfile.TemporaryDirectory() as temporary:
+            capture_root = Path(temporary)
+            rgb_path = Path("rgb/capture-test") / "000000.png"
+            mask_path = Path("masks/capture-test") / "000000.png"
+            _write_png(capture_root / rgb_path, 4, 4, (64, 64, 64))
+            _write_png(capture_root / mask_path, 4, 4, (1, 0, 0))
+            raw = _raw_frame(0, rgb_path.as_posix(), mask_path.as_posix())
+            raw["objects"][0]["visibility_fraction"] = 204.75
+            raw["objects"][0]["occlusion_fraction"] = -203.75
+            raw_path = capture_root / "raw/capture-test/000000.json"
+            raw_path.parent.mkdir(parents=True, exist_ok=True)
+            raw_path.write_text(json.dumps(raw), encoding="utf-8")
+
+            process_capture(capture_root, ROOT / "configs/ontology.json")
+
+            frame = CaptureFrame.from_json_file(
+                capture_root / "annotations/capture-test/000000.json"
+            )
+            self.assertEqual(frame.objects[0].visibility_fraction, 1.0)
+            self.assertEqual(frame.objects[0].occlusion_fraction, 0.0)
+
 
 def _raw_frame(frame_index: int, rgb_path: str, mask_path: str) -> dict[str, object]:
     vector = {"x": 0.0, "y": 0.0, "z": 0.0}

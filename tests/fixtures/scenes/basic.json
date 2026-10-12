@@ -1,0 +1,8 @@
+{
+  "description": "One reward straight ahead that the agent walks toward; a wall off to the left.",
+  "frames": 12,
+  "objects": [
+    {"name": "goal", "label": "GoodGoal", "score": 0.92, "keyframes": {"0": [120, 118, 136, 134], "11": [112, 126, 144, 158]}},
+    {"name": "wall", "label": "Wall", "score": 0.95, "keyframes": {"0": [10, 90, 70, 140], "11": [0, 80, 60, 160]}}
+  ]
+}

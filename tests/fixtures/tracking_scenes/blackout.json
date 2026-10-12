@@ -1,0 +1,9 @@
+{
+  "description": "Two static rewards; the screen goes black for ten frames (Animal-AI blackout), then comes back.",
+  "frames": 22,
+  "objects": [
+    {"name": "good", "label": "GoodGoal", "score": 0.9, "keyframes": {"0": [60, 112, 76, 128]}},
+    {"name": "bad", "label": "BadGoal", "score": 0.9, "keyframes": {"0": [170, 112, 186, 128]}}
+  ],
+  "unobservable": [[6, 15]]
+}

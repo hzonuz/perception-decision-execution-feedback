@@ -1,5 +1,3 @@
-"""Validated detector training configuration."""
-
 from __future__ import annotations
 
 import json
@@ -22,6 +20,7 @@ _AUGMENTATION_KEYS = {
     "mosaic",
     "mixup",
     "copy_paste",
+    "erasing",
 }
 
 
@@ -61,15 +60,29 @@ class DetectorConfig:
 
     def validate(self) -> None:
         for name in ("data", "model", "output_root", "experiment_name", "device"):
-            if not isinstance(getattr(self, name), str) or not getattr(self, name).strip():
+            if (
+                not isinstance(getattr(self, name), str)
+                or not getattr(self, name).strip()
+            ):
                 raise ValueError(f"{name} must be a non-empty string")
-        for name in ("seed", "epochs", "image_size", "batch_size", "workers", "calibration_bins"):
+        for name in (
+            "seed",
+            "epochs",
+            "image_size",
+            "batch_size",
+            "workers",
+            "calibration_bins",
+        ):
             if type(getattr(self, name)) is not int:
                 raise ValueError(f"{name} must be an integer")
         if self.epochs <= 0 or self.image_size <= 0 or self.batch_size == 0:
-            raise ValueError("epochs and image_size must be positive; batch_size must be non-zero")
+            raise ValueError(
+                "epochs and image_size must be positive; batch_size must be non-zero"
+            )
         if self.workers < 0 or self.calibration_bins <= 0:
-            raise ValueError("workers must be non-negative and calibration_bins positive")
+            raise ValueError(
+                "workers must be non-negative and calibration_bins positive"
+            )
         for name in ("confidence_threshold", "nms_iou", "match_iou"):
             value = getattr(self, name)
             if not isinstance(value, int | float) or not 0 <= value <= 1:

@@ -1,0 +1,7 @@
+{
+  "description": "A reward drifts out of the right edge (the agent turns away), then comes back from that edge.",
+  "frames": 26,
+  "objects": [
+    {"name": "goal", "label": "GoodGoal", "score": 0.9, "keyframes": {"0": [180, 112, 196, 128], "8": [260, 112, 276, 128], "17": [260, 112, 276, 128], "25": [220, 112, 236, 128]}}
+  ]
+}

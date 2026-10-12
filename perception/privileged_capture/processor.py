@@ -1,9 +1,6 @@
-"""Convert raw Unity simulator capture into validated shared contracts."""
-
 from __future__ import annotations
 
 import hashlib
-import json
 import math
 import re
 import struct
@@ -23,6 +20,14 @@ from perception.contracts import (
     SourceType,
     Vector3,
 )
+from perception.jsonio import as_object as _as_object
+from perception.jsonio import integer_field as _integer
+from perception.jsonio import list_field as _list
+from perception.jsonio import number_field as _number
+from perception.jsonio import object_field as _object
+from perception.jsonio import read_object as _read_object
+from perception.jsonio import string_field as _string
+from perception.jsonio import write_json, write_text as _write
 from perception.ontology import Ontology, load_ontology
 
 
@@ -33,7 +38,6 @@ def process_capture(
     capture_root: str | Path,
     ontology_path: str | Path = "configs/ontology.json",
 ) -> dict[str, Any]:
-    """Validate raw Unity frames and write capture/oracle JSON beside the images."""
     root = Path(capture_root).resolve()
     ontology = load_ontology(ontology_path)
     raw_paths = sorted((root / "raw").glob("*/*.json"))
@@ -100,7 +104,7 @@ def process_capture(
         "stable_identity_verified": bool(persistent),
         "unavailable_fields": sorted(unavailable),
     }
-    _write(root / "capture_report.json", json.dumps(report, indent=2, sort_keys=True))
+    write_json(root / "capture_report.json", report)
     return report
 
 
@@ -176,9 +180,7 @@ def _capture_frame(root: Path, raw: dict[str, Any], ontology: Ontology) -> Captu
                 "instance_id": _string(item, "instance_id"),
                 "exact_simulator_class": exact_class,
                 "semantic_distribution": {
-                    "entries": [
-                        {"label": mapping.semantic_class, "probability": 1.0}
-                    ],
+                    "entries": [{"label": mapping.semantic_class, "probability": 1.0}],
                     "unknown_probability": 0.0,
                 },
                 "functional_types": functional_types,
@@ -189,8 +191,12 @@ def _capture_frame(root: Path, raw: dict[str, Any], ontology: Ontology) -> Captu
                 "bounding_box": box,
                 "instance_mask": mask_reference,
                 "relative_depth": item.get("relative_depth"),
-                "visibility_fraction": item.get("visibility_fraction"),
-                "occlusion_fraction": item.get("occlusion_fraction"),
+                "visibility_fraction": _clamped_visibility(
+                    item.get("visibility_fraction")
+                ),
+                "occlusion_fraction": _complement(
+                    _clamped_visibility(item.get("visibility_fraction"))
+                ),
                 "attributes": [
                     {
                         "name": "unity_tag",
@@ -367,9 +373,7 @@ def _distance(left: Vector3 | None, right: Vector3) -> float | None:
     if left is None:
         return None
     return math.sqrt(
-        (right.x - left.x) ** 2
-        + (right.y - left.y) ** 2
-        + (right.z - left.z) ** 2
+        (right.x - left.x) ** 2 + (right.y - left.y) ** 2 + (right.z - left.z) ** 2
     )
 
 
@@ -377,6 +381,20 @@ def _relative_velocity(left: Vector3 | None, right: Vector3 | None) -> Vector3 |
     if left is None or right is None:
         return None
     return Vector3(right.x - left.x, right.y - left.y, right.z - left.z)
+
+
+def _clamped_visibility(value: float | None) -> float | None:
+    # visible_pixels / amodal_pixels occasionally exceeds 1.0 in the raw capture: a rare mask
+    # colour collision or anti-aliasing edge in Unity's pixel count can inflate visible_pixels
+    # past the true amodal silhouette. The measurement is unreliable past the boundary; clamp
+    # rather than reject the object.
+    if value is None:
+        return None
+    return max(0.0, min(1.0, value))
+
+
+def _complement(value: float | None) -> float | None:
+    return None if value is None else 1.0 - value
 
 
 def _validate_png(root: Path, relative: str, width: int, height: int) -> str:
@@ -396,56 +414,3 @@ def _validate_png(root: Path, relative: str, width: int, height: int) -> str:
             f"expected {width}x{height}"
         )
     return hashlib.sha256(payload).hexdigest()
-
-
-def _read_object(path: Path) -> dict[str, Any]:
-    try:
-        value = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        raise ValueError(f"invalid raw capture record {path}: {exc}") from exc
-    return _as_object(value, str(path))
-
-
-def _as_object(value: object, name: str) -> dict[str, Any]:
-    if not isinstance(value, dict):
-        raise ValueError(f"{name} must be an object")
-    return value
-
-
-def _object(value: dict[str, Any], name: str) -> dict[str, Any]:
-    if name not in value:
-        raise ValueError(f"missing required field {name!r}")
-    return _as_object(value[name], name)
-
-
-def _list(value: dict[str, Any], name: str) -> list[dict[str, Any]]:
-    items = value.get(name)
-    if not isinstance(items, list):
-        raise ValueError(f"{name} must be an array")
-    return [_as_object(item, f"{name}[{index}]") for index, item in enumerate(items)]
-
-
-def _string(value: dict[str, Any], name: str) -> str:
-    item = value.get(name)
-    if not isinstance(item, str) or not item.strip():
-        raise ValueError(f"{name} must be a non-empty string")
-    return item
-
-
-def _integer(value: dict[str, Any], name: str) -> int:
-    item = value.get(name)
-    if not isinstance(item, int) or isinstance(item, bool):
-        raise ValueError(f"{name} must be an integer")
-    return item
-
-
-def _number(value: dict[str, Any], name: str) -> float:
-    item = value.get(name)
-    if not isinstance(item, int | float) or isinstance(item, bool):
-        raise ValueError(f"{name} must be numeric")
-    return float(item)
-
-
-def _write(path: Path, payload: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(payload + ("\n" if not payload.endswith("\n") else ""), encoding="utf-8")

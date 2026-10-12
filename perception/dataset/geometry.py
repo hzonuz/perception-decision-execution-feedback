@@ -1,22 +1,18 @@
-"""Mask-to-polygon geometry used by dataset validation and export."""
-
 from __future__ import annotations
 
 from collections import deque
 
+import numpy as np
 from PIL import Image
 
 from perception.dataset.models import Point, Polygon
 
 
 def instance_pixels(image: Image.Image, instance_value: int) -> set[Point]:
-    pixels: set[Point] = set()
-    for y in range(image.height):
-        for x in range(image.width):
-            red, green, blue = image.getpixel((x, y))
-            if red | (green << 8) | (blue << 16) == instance_value:
-                pixels.add((x, y))
-    return pixels
+    array = np.asarray(image, dtype=np.uint32)
+    packed = array[..., 0] | (array[..., 1] << 8) | (array[..., 2] << 16)
+    ys, xs = np.nonzero(packed == instance_value)
+    return set(zip(xs.tolist(), ys.tolist()))
 
 
 def polygons(pixels: set[Point]) -> list[Polygon]:
@@ -97,9 +93,9 @@ def _remove_collinear(points: list[Point]) -> list[Point]:
 
 
 def _cross(left: Point, middle: Point, right: Point) -> int:
-    return (middle[0] - left[0]) * (right[1] - middle[1]) - (
-        middle[1] - left[1]
-    ) * (right[0] - middle[0])
+    return (middle[0] - left[0]) * (right[1] - middle[1]) - (middle[1] - left[1]) * (
+        right[0] - middle[0]
+    )
 
 
 def polygon_area(polygon: Polygon) -> float:

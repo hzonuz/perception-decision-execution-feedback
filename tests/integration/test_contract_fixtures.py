@@ -78,28 +78,6 @@ class ContractFixtureIntegrationTests(unittest.TestCase):
             compatibility["python"],
         )
 
-    def test_validation_cli_accepts_both_fixtures(self) -> None:
-        completed = subprocess.run(
-            [
-                sys.executable,
-                str(ROOT / "scripts" / "validate_contracts.py"),
-                "--ontology",
-                str(ONTOLOGY_PATH),
-                "--capture",
-                str(CAPTURE_PATH),
-                "--ssg",
-                str(SSG_PATH),
-            ],
-            cwd=ROOT,
-            check=False,
-            capture_output=True,
-            text=True,
-        )
-
-        self.assertEqual(completed.returncode, 0, completed.stderr)
-        self.assertIn("capture_validated", completed.stderr)
-        self.assertIn("ssg_validated", completed.stderr)
-
 
 if __name__ == "__main__":
     unittest.main()

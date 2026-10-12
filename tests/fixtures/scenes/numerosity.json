@@ -1,0 +1,11 @@
+{
+  "description": "Three rewards on the left, one on the right; later a wall slides in front of one left reward.",
+  "frames": 14,
+  "objects": [
+    {"name": "l1", "label": "GoodGoalMulti", "score": 0.9, "keyframes": {"0": [20, 120, 34, 134]}, "occluded_by": "screen"},
+    {"name": "l2", "label": "GoodGoalMulti", "score": 0.9, "keyframes": {"0": [50, 122, 64, 136]}, "occluded_by": "screen"},
+    {"name": "l3", "label": "GoodGoalMulti", "score": 0.88, "keyframes": {"0": [80, 119, 94, 133]}},
+    {"name": "r1", "label": "GoodGoalMulti", "score": 0.9, "keyframes": {"0": [190, 121, 204, 135]}},
+    {"name": "screen", "label": "Wall", "score": 0.95, "keyframes": {"6": [0, 110, 40, 150], "9": [40, 110, 80, 150]}, "from": 6}
+  ]
+}

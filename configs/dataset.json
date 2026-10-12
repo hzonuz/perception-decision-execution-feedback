@@ -10,8 +10,8 @@
     "group_by": "episode",
     "random_seed": 20260725,
     "ratios": {
-      "test": 0.2,
-      "train": 0.6,
+      "test": 0.1,
+      "train": 0.7,
       "val": 0.2
     }
   },

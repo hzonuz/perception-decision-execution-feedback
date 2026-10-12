@@ -7,6 +7,8 @@ from enum import Enum
 
 from perception.contracts.base import ContractValidationError, JsonContract
 from perception.contracts.common import (
+    SCHEMA_VERSION,
+    CategoricalDistribution,
     FrameStamp,
     MemoryState,
     MotionState,
@@ -14,10 +16,11 @@ from perception.contracts.common import (
     SourceType,
     Uncertainty,
     _require_nonempty,
+    _require_nonnegative_finite,
     _require_nonnegative_int,
     _require_probability,
 )
-from perception.contracts.geometry import Vector3
+from perception.contracts.geometry import BoundingBox2D, MaskReference, Vector2, Vector3
 
 
 class TrackLifecycle(str, Enum):
@@ -86,3 +89,72 @@ class ObjectMemory(JsonContract):
                 "object memory requires a non-privileged temporal_memory source"
             )
 
+
+
+@dataclass(frozen=True, slots=True)
+class TrackState(JsonContract):
+    """Full per-frame state of one track: the association `record`, the visibility/existence
+    `memory`, and what neither carries. `bounding_box`/`instance_mask` are the last *observed*
+    ones (`memory.last_seen`); `image_velocity` is px/s in image coordinates (includes ego-motion);
+    `relative_depth` is `None` when not estimated."""
+
+    record: TrackRecord
+    memory: ObjectMemory
+    semantic_distribution: CategoricalDistribution
+    bounding_box: BoundingBox2D | None
+    instance_mask: MaskReference | None
+    image_velocity: Vector2 | None
+    relative_depth: float | None
+    hits: int
+    tracker_confidence: float | None
+    occluder_track_id: str | None
+    termination_reason: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.record.track_id != self.memory.track_id:
+            raise ContractValidationError("record and memory must describe the same track")
+        if self.record.stamp != self.memory.updated_at:
+            raise ContractValidationError("record and memory must share a stamp")
+        if self.record.age_frames != self.memory.age_frames:
+            raise ContractValidationError("record and memory ages must match")
+        _require_nonnegative_int(self.hits, "hits")
+        if self.hits + self.record.missed_frames > self.record.age_frames:
+            raise ContractValidationError("hits plus misses cannot exceed age_frames")
+        if self.relative_depth is not None:
+            _require_nonnegative_finite(self.relative_depth, "relative_depth")
+        if self.tracker_confidence is not None:
+            _require_probability(self.tracker_confidence, "tracker_confidence")
+        if self.occluder_track_id == self.record.track_id:
+            raise ContractValidationError("a track cannot occlude itself")
+        if (self.memory.state is MemoryState.TERMINATED) != (self.termination_reason is not None):
+            raise ContractValidationError("termination_reason is required exactly when terminated")
+        if (self.bounding_box is None) != (self.memory.last_seen is None):
+            raise ContractValidationError("a last box exists exactly when the track has been seen")
+
+
+@dataclass(frozen=True, slots=True)
+class TrackFrame(JsonContract):
+    """Tracker output for one frame, independent of any scene graph. Tracks archived or terminated
+    at this frame appear here one last time."""
+
+    schema_version: str
+    stamp: FrameStamp
+    observable: bool
+    tracks: tuple[TrackState, ...]
+    source: SourceMetadata
+
+    def __post_init__(self) -> None:
+        if self.schema_version != SCHEMA_VERSION:
+            raise ContractValidationError(f"unsupported schema_version {self.schema_version!r}")
+        ids = [item.record.track_id for item in self.tracks]
+        if len(ids) != len(set(ids)):
+            raise ContractValidationError("track IDs must be unique within a frame")
+        for item in self.tracks:
+            if item.record.stamp != self.stamp:
+                raise ContractValidationError("every track must be stamped with the frame")
+            if item.occluder_track_id is not None and item.occluder_track_id not in ids:
+                raise ContractValidationError("occluder must be a track in the same frame")
+            if not self.observable and item.record.lifecycle in (TrackLifecycle.CREATED, TrackLifecycle.UPDATED):
+                raise ContractValidationError("an unobservable frame cannot create or update tracks")
+        if self.source.source is not SourceType.TRACKER or self.source.privileged:
+            raise ContractValidationError("track frames require a non-privileged tracker source")

@@ -1,0 +1,8 @@
+{
+  "description": "Two same-class rewards cross; the nearer, larger one (B) completely hides A for a few frames.",
+  "frames": 30,
+  "objects": [
+    {"name": "A", "label": "GoodGoal", "score": 0.9, "keyframes": {"0": [40, 110, 60, 130], "29": [156, 110, 176, 130]}, "occluded_by": "B"},
+    {"name": "B", "label": "GoodGoal", "score": 0.92, "keyframes": {"0": [152, 106, 180, 134], "29": [36, 106, 64, 134]}}
+  ]
+}

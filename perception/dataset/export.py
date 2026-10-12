@@ -1,5 +1,3 @@
-"""YOLO, COCO, statistics, metadata, and visualization writers."""
-
 from __future__ import annotations
 
 import hashlib
@@ -13,6 +11,7 @@ from typing import Any
 from PIL import Image, ImageDraw
 
 from perception.dataset.geometry import polygon_area
+from perception.jsonio import write_json
 from perception.dataset.models import DatasetConfig, Issue, SPLITS, Sample
 
 
@@ -37,7 +36,8 @@ def write_dataset(
     }
     try:
         for sample in sorted(
-            samples, key=lambda item: (item.frame.episode_id, item.frame.stamp.frame_index)
+            samples,
+            key=lambda item: (item.frame.episode_id, item.frame.stamp.frame_index),
         ):
             split = split_by_sample[
                 (sample.frame.episode_id, sample.frame.stamp.frame_index)
@@ -49,7 +49,9 @@ def write_dataset(
             _write_yolo_label(label_destination, sample)
             metadata_files[split].write(
                 json.dumps(
-                    _metadata_record(sample, split, image_destination, label_destination),
+                    _metadata_record(
+                        sample, split, image_destination, label_destination
+                    ),
                     sort_keys=True,
                 )
                 + "\n"
@@ -267,9 +269,11 @@ def _metadata_record(
                 "exact_simulator_class": item.annotation.exact_simulator_class,
                 "class_name": item.class_name,
                 "class_id": item.class_id,
-                "bounding_box": item.annotation.bounding_box.to_dict()
-                if item.annotation.bounding_box
-                else None,
+                "bounding_box": (
+                    item.annotation.bounding_box.to_dict()
+                    if item.annotation.bounding_box
+                    else None
+                ),
                 "area_pixels": item.area_pixels,
                 "visibility_fraction": item.annotation.visibility_fraction,
                 "occlusion_fraction": item.annotation.occlusion_fraction,
@@ -450,11 +454,3 @@ def _class_color(class_id: int) -> tuple[int, int, int]:
 
 def _display_fraction(value: float | None) -> str:
     return "?" if value is None else f"{value:.2f}"
-
-
-def write_json(path: Path, payload: object) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n",
-        encoding="utf-8",
-    )

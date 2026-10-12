@@ -1,0 +1,9 @@
+{
+  "description": "A reward behind a lava (DeathZone) patch on the straight path; a HotZone off to the side.",
+  "frames": 6,
+  "objects": [
+    {"name": "goal", "label": "GoodGoal", "score": 0.9, "keyframes": {"0": [118, 114, 138, 132]}},
+    {"name": "lava", "label": "DeathZone", "score": 0.9, "keyframes": {"0": [90, 134, 170, 150]}},
+    {"name": "hot", "label": "HotZone", "score": 0.85, "keyframes": {"0": [200, 134, 250, 146]}}
+  ]
+}

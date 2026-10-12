@@ -1,0 +1,8 @@
+{
+  "description": "A real reward, plus a one-frame low-confidence false detection that should decay away.",
+  "frames": 12,
+  "objects": [
+    {"name": "goal", "label": "GoodGoal", "score": 0.9, "keyframes": {"0": [60, 112, 76, 128]}},
+    {"name": "ghost", "label": "BadGoal", "score": 0.4, "keyframes": {"0": [180, 114, 194, 128]}, "from": 3, "until": 3}
+  ]
+}

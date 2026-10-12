@@ -1,5 +1,3 @@
-"""Capture loading and dataset-integrity checks."""
-
 from __future__ import annotations
 
 import math
@@ -27,7 +25,9 @@ def load_samples(
         paths = sorted((root / "annotations").glob("*/*.json"))
         if not paths:
             issues.append(
-                Issue("error", "missing_annotations", f"no annotations found under {root}")
+                Issue(
+                    "error", "missing_annotations", f"no annotations found under {root}"
+                )
             )
         for path in paths:
             try:
@@ -41,9 +41,11 @@ def load_samples(
                 issues.append(
                     Issue(
                         "error",
-                        "unknown_class"
-                        if "unmapped simulator class" in str(exc)
-                        else "malformed_annotation",
+                        (
+                            "unknown_class"
+                            if "unmapped simulator class" in str(exc)
+                            else "malformed_annotation"
+                        ),
                         f"{path}: {exc}",
                         frame.episode_id,
                         frame.stamp.frame_index,
@@ -188,9 +190,7 @@ def _load_objects(
                 mask = mask_cache[mask_path]
                 if mask.size != (frame.rgb.width, frame.rgb.height):
                     raise ValueError("mask dimensions do not match RGB")
-                pixels = instance_pixels(
-                    mask, annotation.instance_mask.instance_value
-                )
+                pixels = instance_pixels(mask, annotation.instance_mask.instance_value)
             except (OSError, ValueError) as exc:
                 issues.append(
                     Issue(
@@ -359,9 +359,7 @@ def _motion(annotation: ObjectAnnotation, threshold: float) -> str:
     if annotation.velocity is None:
         return "unknown"
     speed = math.sqrt(
-        annotation.velocity.x**2
-        + annotation.velocity.y**2
-        + annotation.velocity.z**2
+        annotation.velocity.x**2 + annotation.velocity.y**2 + annotation.velocity.z**2
     )
     return "moving" if speed >= threshold else "stationary"
 

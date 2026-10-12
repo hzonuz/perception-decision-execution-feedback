@@ -1,0 +1,8 @@
+{
+  "description": "A reward passes behind a nearer wall, is hidden for several frames, and comes out the other side.",
+  "frames": 30,
+  "objects": [
+    {"name": "wall", "label": "Wall", "score": 0.95, "keyframes": {"0": [100, 80, 160, 150]}},
+    {"name": "goal", "label": "GoodGoal", "score": 0.9, "keyframes": {"0": [30, 112, 50, 130], "29": [230, 112, 250, 130]}, "occluded_by": "wall"}
+  ]
+}

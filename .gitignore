@@ -11,6 +11,7 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 .cache/
+.claude/
 .coverage
 coverage.xml
 htmlcov/
@@ -62,3 +63,11 @@ captures/
 *.mov
 *.avi
 *.mkv
+
+competition_configurations/
+
+# Local capture switch (absolute paths, machine specific)
+perception_capture.json
+
+
+.ipynb_checkpoints/

@@ -1,5 +1,3 @@
-"""Privileged contracts shared with the capture exporter."""
-
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -40,7 +38,9 @@ class PrimitiveAction(JsonContract):
         for field_name in ("forward", "rotate"):
             value = getattr(self, field_name)
             if value is not None and value not in (0, 1, 2):
-                raise ContractValidationError(f"{field_name} action must be 0, 1, 2, or unknown")
+                raise ContractValidationError(
+                    f"{field_name} action must be 0, 1, 2, or unknown"
+                )
 
 
 @dataclass(frozen=True, slots=True)
@@ -152,27 +152,45 @@ class CaptureFrame(JsonContract):
 
     def __post_init__(self) -> None:
         if self.schema_version != SCHEMA_VERSION:
-            raise ContractValidationError(f"unsupported schema_version {self.schema_version!r}")
+            raise ContractValidationError(
+                f"unsupported schema_version {self.schema_version!r}"
+            )
         _require_nonempty(self.episode_id, "episode_id")
         _require_nonempty(self.arena_id, "arena_id")
         if self.stamp.episode_id != self.episode_id:
-            raise ContractValidationError("stamp episode_id must match frame episode_id")
+            raise ContractValidationError(
+                "stamp episode_id must match frame episode_id"
+            )
         ids = [item.instance_id for item in self.objects]
         if len(ids) != len(set(ids)):
-            raise ContractValidationError("object instance IDs must be unique within a frame")
+            raise ContractValidationError(
+                "object instance IDs must be unique within a frame"
+            )
         for item in self.objects:
             box = item.bounding_box
-            if box is not None and (box.image_width != self.rgb.width or box.image_height != self.rgb.height):
-                raise ContractValidationError("object box dimensions must match the RGB image")
+            if box is not None and (
+                box.image_width != self.rgb.width or box.image_height != self.rgb.height
+            ):
+                raise ContractValidationError(
+                    "object box dimensions must match the RGB image"
+                )
             mask = item.instance_mask
-            if mask is not None and (mask.width != self.rgb.width or mask.height != self.rgb.height):
-                raise ContractValidationError("object mask dimensions must match the RGB image")
+            if mask is not None and (
+                mask.width != self.rgb.width or mask.height != self.rgb.height
+            ):
+                raise ContractValidationError(
+                    "object mask dimensions must match the RGB image"
+                )
         for event in (*self.lifecycle_events, *self.contact_events):
             if event.stamp.episode_id != self.episode_id:
-                raise ContractValidationError("event episode_id must match frame episode_id")
+                raise ContractValidationError(
+                    "event episode_id must match frame episode_id"
+                )
         _require_oracle_source(self.source)
 
 
 def _require_oracle_source(source: SourceMetadata) -> None:
     if source.source is not SourceType.SIMULATOR_ORACLE or not source.privileged:
-        raise ContractValidationError("capture records require a privileged simulator_oracle source")
+        raise ContractValidationError(
+            "capture records require a privileged simulator_oracle source"
+        )

@@ -94,7 +94,7 @@
       "relative_distance": 7.25,
       "relative_velocity": {"x": 0.0, "y": 0.0, "z": 0.0},
       "semantic_distribution": {
-        "entries": [{"label": "positive_goal", "probability": 1.0}],
+        "entries": [{"label": "GoodGoal", "probability": 1.0}],
         "unknown_probability": 0.0
       },
       "source": {

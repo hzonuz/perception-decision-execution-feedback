@@ -1,5 +1,3 @@
-"""Dataset configuration and internal records."""
-
 from __future__ import annotations
 
 import json
@@ -9,6 +7,11 @@ from pathlib import Path
 from typing import Any
 
 from perception.contracts import CaptureFrame, ObjectAnnotation
+from perception.jsonio import boolean_field as _boolean
+from perception.jsonio import integer_field as _integer
+from perception.jsonio import number_field as _number
+from perception.jsonio import object_field as _object
+from perception.jsonio import string_field as _string
 
 
 SPLITS = ("train", "val", "test")
@@ -17,7 +20,7 @@ Polygon = tuple[Point, ...]
 
 
 class DatasetValidationError(ValueError):
-    """Raised after an integrity report has been written."""
+    pass
 
 
 @dataclass(frozen=True, slots=True)
@@ -72,9 +75,13 @@ class DatasetConfig:
         ):
             raise ValueError("split ratios must be non-negative and sum to 1")
         if self.box_mask_tolerance_pixels < 0 or self.moving_speed_threshold < 0:
-            raise ValueError("pixel tolerance and moving threshold must be non-negative")
+            raise ValueError(
+                "pixel tolerance and moving threshold must be non-negative"
+            )
         if not 0 < self.small_area_fraction < self.large_area_fraction <= 1:
-            raise ValueError("object area thresholds must satisfy 0 < small < large <= 1")
+            raise ValueError(
+                "object area thresholds must satisfy 0 < small < large <= 1"
+            )
         if self.visualization_samples_per_split < 0:
             raise ValueError("visualization sample count must be non-negative")
 
@@ -133,38 +140,3 @@ class Sample:
             for character in self.frame.episode_id
         )
         return f"{safe_episode}__{self.frame.stamp.frame_index:06d}"
-
-
-def _object(value: dict[str, Any], name: str) -> dict[str, Any]:
-    item = value.get(name)
-    if not isinstance(item, dict):
-        raise ValueError(f"{name} must be an object")
-    return item
-
-
-def _string(value: dict[str, Any], name: str) -> str:
-    item = value.get(name)
-    if not isinstance(item, str) or not item:
-        raise ValueError(f"{name} must be a non-empty string")
-    return item
-
-
-def _integer(value: dict[str, Any], name: str) -> int:
-    item = value.get(name)
-    if type(item) is not int:
-        raise ValueError(f"{name} must be an integer")
-    return item
-
-
-def _number(value: dict[str, Any], name: str) -> float:
-    item = value.get(name)
-    if type(item) not in (int, float) or not math.isfinite(item):
-        raise ValueError(f"{name} must be a finite number")
-    return float(item)
-
-
-def _boolean(value: dict[str, Any], name: str) -> bool:
-    item = value.get(name)
-    if type(item) is not bool:
-        raise ValueError(f"{name} must be a boolean")
-    return item
